@@ -10,7 +10,7 @@ func Unmarshal() *Interfaces {
 }
 
 func UnmarshalWith(path string) *Interfaces {
-	if !isExist(path) {
+	if err := isExist(path); err != nil {
 		return nil
 	}
 	interfaces := &Interfaces{interfacesPath: path}

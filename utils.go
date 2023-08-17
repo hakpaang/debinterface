@@ -2,7 +2,6 @@ package debinterface
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -10,15 +9,9 @@ import (
 	"strings"
 )
 
-func isExist(path string) bool {
+func isExist(path string) error {
 	_, err := os.Stat(path)
-	if err == nil {
-		return true
-	}
-	if errors.Is(err, os.ErrNotExist) {
-		return false
-	}
-	return false
+	return err
 }
 
 func readFileByLine(path string) ([]string, error) {
@@ -45,6 +38,28 @@ func readFileByLine(path string) ([]string, error) {
 		result = append(result, l)
 	}
 	return result, nil
+}
+
+func writeFileByLine(path string, lines []string) error {
+	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
+	buffer := bufio.NewWriter(f)
+	for _, line := range lines {
+		_, err := buffer.WriteString(line + "\n")
+		if err != nil {
+			return err
+		}
+	}
+	// flush buffered data to the file
+	if err := buffer.Flush(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func split(s string) []string {

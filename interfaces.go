@@ -1,6 +1,8 @@
 package debinterface
 
-import "net"
+import (
+	"net"
+)
 
 type Interfaces struct {
 	interfacesPath string
@@ -24,6 +26,17 @@ func toFamily(f string) Family {
 		return INET6
 	default:
 		return 0
+	}
+}
+
+func (f Family) fromFamily() string {
+	switch f {
+	case INET:
+		return "inet"
+	case INET6:
+		return "inet6"
+	default:
+		return ""
 	}
 }
 
@@ -51,6 +64,21 @@ func toProtocol(f string) Protocol {
 	}
 }
 
+func (p Protocol) fromProtocol() string {
+	switch p {
+	case DHCP:
+		return "dhcp"
+	case STATIC:
+		return "static"
+	case LOOPBACK:
+		return "loopback"
+	case MANUAL:
+		return "manual"
+	default:
+		return ""
+	}
+}
+
 type Adapter struct {
 	Name      string
 	Auto      bool
@@ -62,4 +90,83 @@ type Adapter struct {
 	Gateway   net.IP
 	Family    Family
 	Protocol  Protocol
+}
+
+func (adapter *Adapter) validateAll() bool {
+	if !adapter.validateName() {
+		return false
+	}
+	if !adapter.validateAddress() {
+		return false
+	}
+	if !adapter.validateNetmask() {
+		return false
+	}
+	if !adapter.validateNetwork() {
+		return false
+	}
+	if !adapter.validateBroadcast() {
+		return false
+	}
+	if !adapter.validateGateway() {
+		return false
+	}
+	if !adapter.validateFamily() {
+		return false
+	}
+	if !adapter.validateProtocol() {
+		return false
+	}
+	return true
+}
+
+func (adapter *Adapter) validateName() bool {
+	if len(adapter.Name) == 0 {
+		return false
+	}
+	return true
+}
+
+func (adapter *Adapter) validateAddress() bool {
+	return true
+}
+
+func (adapter *Adapter) validateNetmask() bool {
+	return true
+}
+
+func (adapter *Adapter) validateNetwork() bool {
+	return true
+}
+
+func (adapter *Adapter) validateBroadcast() bool {
+	return true
+}
+
+func (adapter *Adapter) validateGateway() bool {
+	return true
+}
+
+func (adapter *Adapter) validateFamily() bool {
+	switch adapter.Family {
+	case INET:
+		return true
+	case INET6:
+		return true
+	}
+	return false
+}
+
+func (adapter *Adapter) validateProtocol() bool {
+	switch adapter.Protocol {
+	case DHCP:
+		return true
+	case STATIC:
+		return true
+	case MANUAL:
+		return true
+	case LOOPBACK:
+		return true
+	}
+	return false
 }
