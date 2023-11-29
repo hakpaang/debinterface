@@ -2,6 +2,7 @@ package debinterface
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -10,8 +11,14 @@ import (
 )
 
 func isExist(path string) error {
-	_, err := os.Stat(path)
-	return err
+	file, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+	if file.IsDir() {
+		return errors.New(path + " Is a directory")
+	}
+	return nil
 }
 
 func readFileByLine(path string) ([]string, error) {
